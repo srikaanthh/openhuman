@@ -230,7 +230,7 @@ pub async fn run_subagent(
         .unwrap_or_else(|| format!("sub-{}", uuid::Uuid::new_v4()));
     let started = Instant::now();
     let current_depth = current_spawn_depth();
-    let attempted_depth = current_depth + 1;
+    let attempted_depth = current_depth.saturating_add(1);
 
     if attempted_depth > MAX_SPAWN_DEPTH {
         tracing::warn!(
