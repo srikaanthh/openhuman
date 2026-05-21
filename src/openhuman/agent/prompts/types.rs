@@ -158,21 +158,6 @@ pub struct ConnectedIntegrationTool {
     pub parameters: Option<serde_json::Value>,
 }
 
-/// A toolkit action that exists in the catalog but is not currently callable
-/// because the user's configured scope preference for that toolkit does not
-/// permit it.
-#[derive(Debug, Clone)]
-pub struct GatedIntegrationTool {
-    /// Action slug, e.g. `"GMAIL_BATCH_DELETE_MESSAGES"`.
-    pub name: String,
-    /// One-line description of the action.
-    pub description: String,
-    /// Which scope the user must enable for this action to become callable.
-    pub required_scope: String,
-    /// Human-readable settings paths the user can follow to unlock the action.
-    pub unlock_paths: Vec<String>,
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Tool descriptor + call-format
 // ─────────────────────────────────────────────────────────────────────────────
