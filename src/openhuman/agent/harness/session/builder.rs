@@ -1302,17 +1302,17 @@ impl Agent {
         // De-duplicate: some synthesised tool names may collide with
         // already-registered tools (unlikely for `delegate_*` names but
         // cheap to guard against).
-        let synthesized_tool_names: std::collections::HashSet<String> = delegation_tools
+        let existing_names: std::collections::HashSet<String> =
+            tools.iter().map(|t| t.name().to_string()).collect();
+        let inserted_delegation_tools: Vec<Box<dyn Tool>> = delegation_tools
+            .into_iter()
+            .filter(|t| !existing_names.contains(t.name()))
+            .collect();
+        let synthesized_tool_names: std::collections::HashSet<String> = inserted_delegation_tools
             .iter()
             .map(|t| t.name().to_string())
             .collect();
-        let existing_names: std::collections::HashSet<String> =
-            tools.iter().map(|t| t.name().to_string()).collect();
-        tools.extend(
-            delegation_tools
-                .into_iter()
-                .filter(|t| !existing_names.contains(t.name())),
-        );
+        tools.extend(inserted_delegation_tools);
 
         // Pre-fetch Critical + High priority tool-scoped memory rules so they
         // pin into the (compression-resistant) system prompt for the whole
@@ -1520,8 +1520,9 @@ impl Agent {
         builder = builder.archivist_hook(archivist_hook_arc);
         builder = builder.unified_compaction_enabled(config.learning.unified_compaction_enabled);
         let mut agent = builder.build()?;
+        let connected_integrations_initialized = prewarmed_integrations.is_some();
         agent.connected_integrations = prewarmed_integrations.unwrap_or_default();
-        agent.connected_integrations_initialized = prewarmed_integrations.is_some();
+        agent.connected_integrations_initialized = connected_integrations_initialized;
         agent.integration_runtime_config = Some(config.clone());
         agent.last_seen_integrations_hash =
             crate::openhuman::composio::connected_set_hash(&agent.connected_integrations);
